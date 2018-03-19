@@ -3,7 +3,7 @@
 
 '''
 
-	@ author : Eric BEAULIEU <zebux@zebux.org>
+	@ author : Zebux <zebux@zebux.org>
 	@copyright:  AGPLv3
              http://www.gnu.org/licenses/agpl.html
 
