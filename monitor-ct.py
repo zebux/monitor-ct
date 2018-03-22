@@ -16,24 +16,17 @@ from datetime import datetime, timedelta
 
 version = "v0.2"
 nbr_days= 7
+result_cert=[]
 
 from optparse import OptionParser
 usage = "usage: %prog [options] filenames / domain ..."
 parser = OptionParser(usage)
-#parser = OptionParser()
 parser.add_option("-d", dest="domain", help="domain name to check")
 parser.add_option("-v", "--version", action="store_true", dest="version", help="display the version")
 parser.add_option("-f", dest="filenamearg", help="mass domain monitor option. File with one line per domain.")
 parser.add_option("-t", type='int', dest="time", default=7, help="check certificate issue since <days number> days - default 7 days")
 
 (options, args) = parser.parse_args()
-'''
-print 'domain     :', options.domain
-print 'version    :', options.version
-print 'file       :', options.filenamearg
-print 'time       :', options.time
-print 'Args :', args
-'''
 
 if options.version :
   print ""
@@ -55,7 +48,7 @@ def check_ct(dom):
 	req = requests.get("https://crt.sh/?q=%."+ dom +"&output=json")
 	if req.status_code != 200 :
 		print("Server crt.sh is unavailable !!") 
-		exit(1)
+		sys.exit(3)
 	
 	jdata = json.loads('[{}]'.format(req.text.replace('}{', '},{')))
 	#print jdata
@@ -71,16 +64,23 @@ def check_ct(dom):
 	    except ValueError:
 	      print "Oops!  No CN in issuer !"
 	      acn=issuer
+	    result_cert.append(cert + "\t" + date_emis + "\t" + acn)
 	    print cert + "\t" + date_emis + "\t" + acn
+		
 
 if options.domain :
   domain = options.domain
   check_ct(domain)
-  sys.exit(0)
+  if not result_cert:
+   sys.exit(0)
+  sys.exit(2)
  
 if options.filenamearg :
   filename=options.filenamearg
   with open(filename) as fp:
     for domain in fp:
       check_ct(domain.rstrip())
-  sys.exit(0)  
+  if not result_cert:
+    print "liste vide"
+    sys.exit(0)
+  sys.exit(2)  
